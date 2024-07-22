@@ -1,4 +1,5 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
+import 'package:phone_form_field/src/countries.dart';
 
 class PhoneController extends MaskedTextController {
   PhoneController({
@@ -7,7 +8,15 @@ class PhoneController extends MaskedTextController {
     super.afterChange,
     super.beforeChange,
     super.cursorBehavior,
-  });
+  }) {
+    final match = RegExp(r'(\+[\d]+\s)').firstMatch(text);
+    if (match == null) return;
+    final ddi = match.group(1);
+    final index = countries.indexWhere((c) => c['ddi'] == ddi?.trim());
+    if (index == -1) return;
+    final country = countries[index];
+    updateMask(country['pattern']?.replaceAll('X', '0') ?? '');
+  }
 
   String? maskValidator(String? value) {
     if (value == null || value.isEmpty) {
