@@ -1,4 +1,5 @@
 import 'package:diacritic/diacritic.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'countries.dart';
@@ -18,6 +19,8 @@ class PhoneFormField extends StatefulWidget {
     this.validator,
     this.autovalidateMode,
     this.onSelected,
+    this.maxHeight = 256.0,
+    this.barrierColor,
   });
 
   final PhoneController? controller;
@@ -30,6 +33,8 @@ class PhoneFormField extends StatefulWidget {
   final String? Function(String? value)? validator;
   final AutovalidateMode? autovalidateMode;
   final void Function(Country country)? onSelected;
+  final double maxHeight;
+  final Color? barrierColor;
 
   @override
   State<PhoneFormField> createState() => _PhoneFormFieldState();
@@ -70,76 +75,90 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
   void setMenu(RelativeRect pos, BoxConstraints constraints) {
     menu = OverlayEntry(
       builder: (context) {
-        return Positioned.fromRect(
-          rect: Rect.fromLTRB(
-            pos.left,
-            pos.top,
-            pos.left + constraints.maxWidth,
-            pos.bottom + 256,
-          ),
-          child: TapRegion(
-            onTapOutside: (_) => menu?.remove(),
-            child: Material(
-              color: widget.backgroundColor ?? Colors.white,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 256.0,
-                  minHeight: 0.0,
+        final bottom = MediaQuery.of(context).viewInsets.bottom;
+        return Stack(
+          children: [
+            if (!kIsWeb)
+              Positioned.fill(
+                child: Container(
+                  color: widget.barrierColor ?? (Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white54),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      autofocus: true,
-                      maxLines: 1,
-                      style: widget.searchStyle,
-                      onChanged: (value) {
-                        filtered.value = all.where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase())).toSet();
-                      },
-                      onFieldSubmitted: (value) {
-                        if (filtered.value.isNotEmpty) {
-                          return setSelected(filtered.value.first);
-                        }
-                      },
-                      decoration: widget.searchDecoration ??
-                          InputDecoration(
-                            fillColor: widget.backgroundColor ?? Colors.white,
-                            filled: true,
-                            border: const OutlineInputBorder(),
-                            hintText: 'Pesquisar por nome do país',
-                            prefixIcon: const Icon(Icons.search_rounded),
-                          ),
+              ),
+            Positioned.fromRect(
+              rect: Rect.fromLTRB(
+                pos.left,
+                pos.top - bottom,
+                pos.left + constraints.maxWidth,
+                (pos.top + widget.maxHeight) - bottom,
+              ),
+              child: TapRegion(
+                onTapOutside: (_) => menu?.remove(),
+                child: Material(
+                  color: widget.backgroundColor ?? Colors.white,
+                  clipBehavior: Clip.antiAlias,
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: widget.maxHeight,
+                      minHeight: 0.0,
                     ),
-                    Flexible(
-                      child: ValueListenableBuilder(
-                        valueListenable: filtered,
-                        builder: (context, value, child) {
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: value.length,
-                            itemBuilder: (context, index) {
-                              final country = value.elementAt(index);
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          autofocus: true,
+                          maxLines: 1,
+                          style: widget.searchStyle,
+                          onChanged: (value) {
+                            filtered.value = all.where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase())).toSet();
+                          },
+                          onFieldSubmitted: (value) {
+                            if (filtered.value.isNotEmpty) {
+                              return setSelected(filtered.value.first);
+                            }
+                          },
+                          decoration: widget.searchDecoration ??
+                              InputDecoration(
+                                fillColor: widget.backgroundColor ?? Colors.white,
+                                filled: true,
+                                border: const OutlineInputBorder(),
+                                hintText: 'Pesquisar por nome do país',
+                                prefixIcon: const Icon(Icons.search_rounded),
+                              ),
+                        ),
+                        Flexible(
+                          child: ValueListenableBuilder(
+                            valueListenable: filtered,
+                            builder: (context, value, child) {
+                              return ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: value.length,
+                                itemBuilder: (context, index) {
+                                  final country = value.elementAt(index);
 
-                              return ListTile(
-                                leading: Text(country.emoji),
-                                title: Text(
-                                  country.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                onTap: () => setSelected(country),
+                                  return ListTile(
+                                    leading: Text(country.emoji),
+                                    title: Text(
+                                      country.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    onTap: () => setSelected(country),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         );
       },
     );
