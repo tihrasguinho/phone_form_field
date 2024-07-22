@@ -1,21 +1,44 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
+import 'package:phone_form_field/phone_form_field.dart';
 import 'package:phone_form_field/src/countries.dart';
 
 class PhoneController extends MaskedTextController {
+  Country? _selected;
+
+  Country? get selected => _selected;
+
+  void setSelected(Country country) {
+    _selected = country;
+    clear();
+    updateMask(country.pattern);
+    notifyListeners();
+  }
+
   PhoneController({
-    super.mask = '+55 00 00000-0000',
-    super.text,
+    super.mask = '',
+    String? text,
     super.afterChange,
     super.beforeChange,
     super.cursorBehavior,
-  }) {
-    final match = RegExp(r'(\+[\d]+\s)').firstMatch(text);
+  }) : super(translator: {'#': RegExp(r'\d')});
+
+  void updateValue(String? value) {
+    if (value == null) return;
+    final match = RegExp(r'(\+[\d]+\s)').firstMatch(value);
     if (match == null) return;
     final ddi = match.group(1);
     final index = countries.indexWhere((c) => c['ddi'] == ddi?.trim());
     if (index == -1) return;
     final country = countries[index];
-    updateMask(country['pattern']?.replaceAll('X', '0') ?? '');
+    _selected = Country(
+      name: country['country'] ?? '',
+      iso: country['iso'] ?? '',
+      ddi: country['ddi'] ?? '',
+      emoji: country['emoji'] ?? '',
+      pattern: country['pattern']?.replaceAll('X', '#') ?? '',
+    );
+    updateMask(_selected?.pattern ?? '');
+    updateText(value);
   }
 
   String? maskValidator(String? value) {
@@ -25,8 +48,12 @@ class PhoneController extends MaskedTextController {
 
     final pattern = mask.split('').map(
       (l) {
-        if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].contains(l)) {
+        if (l == '#') {
           return r'\d';
+        } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].contains(l)) {
+          return l;
+        } else if (l == ' ') {
+          return r'\s';
         } else {
           return '\\$l';
         }

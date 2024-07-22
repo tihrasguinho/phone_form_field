@@ -42,7 +42,7 @@ class PhoneFormField extends StatefulWidget {
 
 class _PhoneFormFieldState extends State<PhoneFormField> {
   final GlobalKey buttonKey = GlobalKey();
-  final ValueNotifier<Country?> selected = ValueNotifier(Country.defaultCountry());
+  // final ValueNotifier<Country?> selected = ValueNotifier(Country.defaultCountry());
   late final ValueNotifier<Set<Country>> filtered = ValueNotifier(all);
 
   final PhoneController _innerController = PhoneController();
@@ -56,15 +56,13 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
             iso: item['iso'] ?? '',
             ddi: item['ddi'] ?? '',
             emoji: item['emoji'] ?? '',
-            pattern: item['pattern']?.replaceAll('X', '0') ?? '',
+            pattern: item['pattern']?.replaceAll('X', '#') ?? '',
           ),
         ),
       );
 
   void setSelected(Country country) {
-    selected.value = country;
-    controller.clear();
-    controller.updateMask(country.pattern);
+    controller.setSelected(country);
     filtered.value = all;
     widget.onSelected?.call(country);
     return menu?.remove();
@@ -170,9 +168,9 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return ValueListenableBuilder(
-          valueListenable: selected,
-          builder: (context, value, child) {
+        return ListenableBuilder(
+          listenable: controller,
+          builder: (context, child) {
             return TextFormField(
               controller: controller,
               maxLines: 1,
@@ -183,7 +181,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
               keyboardType: TextInputType.phone,
               onChanged: widget.onChanged?.call,
               decoration: widget.decoration?.copyWith(
-                    hintText: value?.pattern,
+                    hintText: controller.selected?.pattern.replaceAll('#', '0'),
                     prefixIconConstraints: const BoxConstraints(
                       maxWidth: kMinInteractiveDimension,
                       maxHeight: kMinInteractiveDimension,
@@ -195,12 +193,12 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                         return setMenu(getPosition(context, buttonKey), constraints);
                       },
                       child: Center(
-                        child: Text(value?.emoji ?? value?.iso ?? 'N/A'),
+                        child: Text(controller.selected?.emoji ?? controller.selected?.iso ?? 'N/A'),
                       ),
                     ),
                   ) ??
                   InputDecoration(
-                    hintText: value?.pattern,
+                    hintText: controller.selected?.pattern.replaceAll('#', '0'),
                     border: const OutlineInputBorder(),
                     prefixIconConstraints: const BoxConstraints(
                       maxWidth: kMinInteractiveDimension,
@@ -213,7 +211,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                         return setMenu(getPosition(context, buttonKey), constraints);
                       },
                       child: Center(
-                        child: Text(value?.emoji ?? value?.iso ?? 'N/A'),
+                        child: Text(controller.selected?.emoji ?? controller.selected?.iso ?? 'N/A'),
                       ),
                     ),
                   ),
