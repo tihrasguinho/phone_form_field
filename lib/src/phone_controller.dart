@@ -3,7 +3,13 @@ import 'package:phone_form_field/phone_form_field.dart';
 import 'package:phone_form_field/src/countries.dart';
 
 class PhoneController extends MaskedTextController {
-  Country? _selected;
+  Country? _selected = const Country(
+    name: 'Brasil',
+    iso: 'BR',
+    ddi: '+55',
+    emoji: '🇧🇷',
+    pattern: '+55 ## #####-####',
+  );
 
   Country? get selected => _selected;
 

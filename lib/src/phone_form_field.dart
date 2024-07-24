@@ -14,6 +14,7 @@ class PhoneFormField extends StatefulWidget {
     this.backgroundColor,
     this.inputStyle,
     this.searchStyle,
+    this.searchHintText,
     this.decoration,
     this.searchDecoration,
     this.validator,
@@ -29,6 +30,7 @@ class PhoneFormField extends StatefulWidget {
   final TextStyle? searchStyle;
   final InputDecoration? decoration;
   final InputDecoration? searchDecoration;
+  final String? searchHintText;
   final Color? backgroundColor;
   final String? Function(String? value)? validator;
   final AutovalidateMode? autovalidateMode;
@@ -42,7 +44,6 @@ class PhoneFormField extends StatefulWidget {
 
 class _PhoneFormFieldState extends State<PhoneFormField> {
   final GlobalKey buttonKey = GlobalKey();
-  // final ValueNotifier<Country?> selected = ValueNotifier(Country.defaultCountry());
   late final ValueNotifier<Set<Country>> filtered = ValueNotifier(all);
 
   final PhoneController _innerController = PhoneController();
@@ -121,7 +122,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                                 fillColor: widget.backgroundColor ?? Colors.white,
                                 filled: true,
                                 border: const OutlineInputBorder(),
-                                hintText: 'Pesquisar por nome do país',
+                                hintText: widget.searchHintText ?? 'Pesquisar por nome do país',
                                 prefixIcon: const Icon(Icons.search_rounded),
                               ),
                         ),
