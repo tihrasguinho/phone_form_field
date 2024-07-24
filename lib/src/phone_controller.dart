@@ -15,7 +15,7 @@ class PhoneController extends MaskedTextController {
   }
 
   PhoneController({
-    super.mask = '',
+    super.mask = '+55 ## #####-####',
     String? text,
     super.afterChange,
     super.beforeChange,
