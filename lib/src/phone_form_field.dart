@@ -75,89 +75,93 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
     menu = OverlayEntry(
       builder: (context) {
         final bottom = MediaQuery.of(context).viewInsets.bottom;
-        return Stack(
-          children: [
-            if (!kIsWeb)
-              Positioned.fill(
-                child: Container(
-                  color: widget.barrierColor ?? (Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white54),
+        return Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [
+              if (!kIsWeb)
+                Positioned.fill(
+                  child: Container(
+                    color: widget.barrierColor ?? (Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white54),
+                  ),
                 ),
-              ),
-            Positioned.fromRect(
-              rect: Rect.fromLTRB(
-                pos.left,
-                pos.top - bottom,
-                pos.left + constraints.maxWidth,
-                (pos.top + widget.maxHeight) - bottom,
-              ),
-              child: TapRegion(
-                onTapOutside: (_) => menu?.remove(),
-                child: Material(
-                  color: widget.backgroundColor ?? Colors.white,
-                  clipBehavior: Clip.antiAlias,
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: widget.maxHeight,
-                      minHeight: 0.0,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextFormField(
-                          autofocus: true,
-                          maxLines: 1,
-                          style: widget.searchStyle,
-                          onChanged: (value) {
-                            filtered.value = all.where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase())).toSet();
-                          },
-                          onFieldSubmitted: (value) {
-                            if (filtered.value.isNotEmpty) {
-                              return setSelected(filtered.value.first);
-                            }
-                          },
-                          decoration: widget.searchDecoration ??
-                              InputDecoration(
-                                fillColor: widget.backgroundColor ?? Colors.white,
-                                filled: true,
-                                border: const OutlineInputBorder(),
-                                hintText: widget.searchHintText ?? 'Pesquisar por nome do país',
-                                prefixIcon: const Icon(Icons.search_rounded),
-                              ),
-                        ),
-                        Flexible(
-                          child: ValueListenableBuilder(
-                            valueListenable: filtered,
-                            builder: (context, value, child) {
-                              return ListView.builder(
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                itemCount: value.length,
-                                itemBuilder: (context, index) {
-                                  final country = value.elementAt(index);
-
-                                  return ListTile(
-                                    leading: Text(country.emoji),
-                                    title: Text(
-                                      country.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    onTap: () => setSelected(country),
-                                  );
-                                },
-                              );
+              Positioned.fromRect(
+                rect: Rect.fromLTRB(
+                  pos.left,
+                  pos.top - bottom,
+                  pos.left + constraints.maxWidth,
+                  (pos.top + widget.maxHeight) - bottom,
+                ),
+                child: TapRegion(
+                  onTapOutside: (_) => menu?.remove(),
+                  child: Material(
+                    color: widget.backgroundColor ?? Colors.white,
+                    clipBehavior: Clip.antiAlias,
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: widget.maxHeight,
+                        minHeight: 0.0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            autofocus: true,
+                            maxLines: 1,
+                            style: widget.searchStyle,
+                            onChanged: (value) {
+                              filtered.value = all.where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase())).toSet();
                             },
+                            onFieldSubmitted: (value) {
+                              if (filtered.value.isNotEmpty) {
+                                return setSelected(filtered.value.first);
+                              }
+                            },
+                            decoration: widget.searchDecoration ??
+                                InputDecoration(
+                                  fillColor: widget.backgroundColor ?? Colors.white,
+                                  filled: true,
+                                  border: const OutlineInputBorder(),
+                                  hintText: widget.searchHintText ?? 'Pesquisar por nome do país',
+                                  prefixIcon: const Icon(Icons.search_rounded),
+                                ),
                           ),
-                        ),
-                      ],
+                          Flexible(
+                            child: ValueListenableBuilder(
+                              valueListenable: filtered,
+                              builder: (context, value, child) {
+                                return ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: value.length,
+                                  itemBuilder: (context, index) {
+                                    final country = value.elementAt(index);
+
+                                    return ListTile(
+                                      leading: Text(country.emoji),
+                                      title: Text(
+                                        country.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      onTap: () => setSelected(country),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
