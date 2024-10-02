@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  diacritic: "0.1.5"
-  extended_masked_text: "3.0.1"
+  diacritic: ^0.1.5
+  extended_masked_text: ^3.0.1
 
 dev_dependencies:
   flutter_test:
