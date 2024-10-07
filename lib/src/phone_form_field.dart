@@ -9,6 +9,7 @@ import 'phone_controller.dart';
 class PhoneFormField extends StatefulWidget {
   const PhoneFormField({
     super.key,
+    this.initialValue,
     this.controller,
     this.onChanged,
     this.backgroundColor,
@@ -24,6 +25,7 @@ class PhoneFormField extends StatefulWidget {
     this.barrierColor,
   });
 
+  final String? initialValue;
   final PhoneController? controller;
   final void Function(String value)? onChanged;
   final TextStyle? inputStyle;
@@ -46,7 +48,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
   final GlobalKey buttonKey = GlobalKey();
   late final ValueNotifier<Set<Country>> filtered = ValueNotifier(all);
 
-  final PhoneController _innerController = PhoneController();
+  late final PhoneController _innerController = PhoneController(text: widget.initialValue ?? '');
 
   PhoneController get controller => widget.controller ?? _innerController;
 
