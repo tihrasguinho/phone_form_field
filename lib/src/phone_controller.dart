@@ -26,7 +26,11 @@ class PhoneController extends MaskedTextController {
     super.afterChange,
     super.beforeChange,
     super.cursorBehavior,
-  }) : super(translator: {'#': RegExp(r'\d')});
+  }) : super(translator: {'#': RegExp(r'\d')}) {
+    if (text != null) {
+      updateValue(text);
+    }
+  }
 
   void updateValue(String? value) {
     if (value == null) return;
