@@ -7,10 +7,10 @@ import 'country.dart';
 import 'phone_controller.dart';
 
 class PhoneFormField extends StatefulWidget {
-  const PhoneFormField({
+  PhoneFormField({
     super.key,
-    this.initialValue,
-    this.controller,
+    String? initialValue,
+    PhoneController? controller,
     this.onChanged,
     this.backgroundColor,
     this.inputStyle,
@@ -25,10 +25,11 @@ class PhoneFormField extends StatefulWidget {
     this.barrierColor,
     this.readOnly = false,
     this.enabled = true,
-  });
+  }) {
+    this.controller = controller ?? PhoneController(text: initialValue);
+  }
 
-  final String? initialValue;
-  final PhoneController? controller;
+  late final PhoneController controller;
   final void Function(String value)? onChanged;
   final TextStyle? inputStyle;
   final TextStyle? searchStyle;
@@ -52,9 +53,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
   final GlobalKey buttonKey = GlobalKey();
   late final ValueNotifier<Set<Country>> filtered = ValueNotifier(all);
 
-  late final PhoneController _innerController = PhoneController(text: widget.initialValue ?? '');
-
-  PhoneController get controller => widget.controller ?? _innerController;
+  PhoneController get controller => widget.controller;
 
   Set<Country> get all => Set.from(
         countries.map(
