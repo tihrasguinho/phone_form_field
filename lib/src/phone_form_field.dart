@@ -23,6 +23,8 @@ class PhoneFormField extends StatefulWidget {
     this.onSelected,
     this.maxHeight = 256.0,
     this.barrierColor,
+    this.readOnly = false,
+    this.enabled = true,
   });
 
   final String? initialValue;
@@ -39,6 +41,8 @@ class PhoneFormField extends StatefulWidget {
   final void Function(Country country)? onSelected;
   final double maxHeight;
   final Color? barrierColor;
+  final bool readOnly;
+  final bool enabled;
 
   @override
   State<PhoneFormField> createState() => _PhoneFormFieldState();
@@ -82,7 +86,8 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
             if (!kIsWeb)
               Positioned.fill(
                 child: Container(
-                  color: widget.barrierColor ?? (Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white54),
+                  color: widget.barrierColor ??
+                      (Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white54),
                 ),
               ),
             Positioned.fromRect(
@@ -112,7 +117,9 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                           maxLines: 1,
                           style: widget.searchStyle,
                           onChanged: (value) {
-                            filtered.value = all.where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase())).toSet();
+                            filtered.value = all
+                                .where((c) => removeDiacritics(c.name.toLowerCase()).contains(value.toLowerCase()))
+                                .toSet();
                           },
                           onFieldSubmitted: (value) {
                             if (filtered.value.isNotEmpty) {
@@ -183,6 +190,8 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
               autovalidateMode: widget.autovalidateMode,
               keyboardType: TextInputType.phone,
               onChanged: widget.onChanged?.call,
+              readOnly: widget.readOnly,
+              enabled: widget.enabled,
               decoration: widget.decoration?.copyWith(
                     hintText: controller.selected?.pattern.replaceAll('#', '0'),
                     prefixIconConstraints: const BoxConstraints(
@@ -193,6 +202,8 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                       key: buttonKey,
                       canRequestFocus: false,
                       onTap: () async {
+                        if (widget.readOnly || !widget.enabled) return;
+
                         return setMenu(getPosition(context, buttonKey), constraints);
                       },
                       child: Center(
@@ -211,6 +222,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
                       key: buttonKey,
                       canRequestFocus: false,
                       onTap: () async {
+                        if (widget.readOnly || !widget.enabled) return;
                         return setMenu(getPosition(context, buttonKey), constraints);
                       },
                       child: Center(
