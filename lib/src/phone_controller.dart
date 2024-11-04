@@ -56,26 +56,39 @@ class PhoneController extends MaskedTextController {
       return 'empty';
     }
 
-    final pattern = mask.split('').map(
-      (l) {
-        if (l == '#') {
-          return r'\d';
-        } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].contains(l)) {
-          return l;
-        } else if (l == ' ') {
-          return r'\s';
+    final pattern = mask.replaceAllMappedIndexed(
+      RegExp(r'(#)\1+'),
+      (index, match) {
+        final length = match.group(0)?.length ?? 0;
+
+        if (mask.startsWith('+55')) {
+          if (index == 1 || index == 2) {
+            return '[\\d]{${length - 1},$length}';
+          } else {
+            return '[\\d]{$length}';
+          }
         } else {
-          return '\\$l';
+          return '[\\d]{$length}';
         }
       },
     );
 
-    final regex = RegExp('^${pattern.join()}\$');
+    final regex = RegExp('^\\$pattern\$');
 
     if (!regex.hasMatch(value)) {
       return 'invalid';
     } else {
       return null;
     }
+  }
+}
+
+extension _String on String {
+  String? replaceAllMappedIndexed(
+    RegExp pattern,
+    String Function(int index, Match match) func,
+  ) {
+    int index = 0;
+    return replaceAllMapped(pattern, (match) => func(index++, match));
   }
 }
